@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Tennis Set 2 Model</title>
+  <meta name="theme-color" content="#0b1220" />
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#111a2e;
+      --muted:#93a4c7;
+      --text:#e8eefc;
+      --accent:#22c55e;
+      --danger:#ef4444;
+      --line:#223052;
+      --chip:#182544;
+    }
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#070b14);color:var(--text)}
+    .wrap{max-width:860px;margin:0 auto;padding:18px 14px 40px}
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+    h1{font-size:18px;margin:0;letter-spacing:.2px}
+    .tourBtn{
+      border:1px solid var(--line);
+      background:var(--chip);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      font-weight:700;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      cursor:pointer;
+      user-select:none;
+    }
+    .pill{padding:4px 10px;border-radius:999px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.35);color:var(--accent);font-weight:800;font-size:12px}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .card{background:rgba(17,26,46,.92);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+    .row{display:grid;grid-template-columns:1fr;gap:10px}
+    @media(min-width:760px){
+      .row{grid-template-columns:1.2fr .8fr .8fr}
+    }
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    select,input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#0e1730;
+      color:var(--text);
+      outline:none;
+      font-size:16px;
+    }
+    input::placeholder{color:#6f83b0}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .out{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+    @media(min-width:760px){
+      .out{grid-template-columns:1fr 1fr}
+    }
+    .metric{
+      padding:12px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(8,12,24,.65);
+    }
+    .metric .k{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .metric .v{font-size:20px;font-weight:800}
+    .sub{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35}
+    .footer{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.35}
+    .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--accent);padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px}
+    .mutebadge{display:inline-flex;align-items:center;gap:6px;background:rgba(147,164,199,.12);border:1px solid rgba(147,164,199,.25);color:var(--muted);padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px}
+    .warn{color:#ffd166}
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .smallBtn{border:1px solid var(--line);background:transparent;color:var(--muted);padding:10px 12px;border-radius:12px;cursor:pointer;font-weight:700}
+    .smallBtn:hover{background:rgba(255,255,255,.04)}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Tennis Set 2 Model</h1>
+    <button id="tourBtn" class="tourBtn" type="button" aria-label="Toggle tour">
+      <span class="mutebadge">Tour</span>
+      <span id="tourPill" class="pill">ATP</span>
+      <span style="color:var(--muted);font-weight:700;">Tap to toggle</span>
+    </button>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <div class="row">
+        <div>
+          <label for="favOdds">Favourite starting odds (0.05 steps)</label>
+          <select id="favOdds"></select>
+        </div>
+        <div>
+          <label for="favSpw">Favourite Set 1 SPW%</label>
+          <input id="favSpw" inputmode="decimal" placeholder="e.g. 66.0" />
+        </div>
+        <div>
+          <label for="dogSpw">Underdog Set 1 SPW%</label>
+          <input id="dogSpw" inputmode="decimal" placeholder="e.g. 52.0" />
+        </div>
+      </div>
+
+      <div class="out">
+        <div class="metric">
+          <div class="k">Favourite predicted Hold%</div>
+          <div id="favHold" class="v">—</div>
+        </div>
+        <div class="metric">
+          <div class="k">Underdog predicted Hold%</div>
+          <div id="dogHold" class="v">—</div>
+        </div>
+        <div class="metric">
+          <div class="k">Favourite blended Set 2 win%</div>
+          <div id="favS2" class="v">—</div>
+        </div>
+        <div class="metric">
+          <div class="k">Underdog blended Set 2 win%</div>
+          <div id="dogS2" class="v">—</div>
+        </div>
+      </div>
+
+      <div class="btnRow">
+        <button class="smallBtn" id="clearBtn" type="button">Clear SPW</button>
+        <span class="mutebadge">Weights: ATP 0.65 / WTA 0.70 (market prior)</span>
+      </div>
+
+      <div class="footer">
+        <div><span class="badge">Inputs</span> Only enter SPW as plain numbers (e.g. 58.0). No % sign.</div>
+        <div style="margin-top:6px;"><span class="mutebadge">Note</span> This uses the same Markov hold model as your sheet. It does not use pre‑match hold; odds are only used as the baseline prior.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- Odds ladder: 1.10 to 1.90 in 0.05 steps
+  const oddsSelect = document.getElementById('favOdds');
+  for (let o=1.10; o<=1.90001; o+=0.05){
+    const v = (Math.round(o*100)/100).toFixed(2);
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    oddsSelect.appendChild(opt);
+  }
+  oddsSelect.value = "1.50";
+
+  // --- Tour toggle
+  let tour = "ATP";
+  const tourBtn = document.getElementById('tourBtn');
+  const tourPill = document.getElementById('tourPill');
+  function setTour(t){
+    tour = t;
+    tourPill.textContent = tour;
+    tourPill.style.background = tour === "ATP" ? "rgba(34,197,94,.15)" : "rgba(34,197,94,.15)";
+  }
+  tourBtn.addEventListener('click', ()=> setTour(tour === "ATP" ? "WTA" : "ATP"));
+
+  // --- Weights (market prior)
+  function marketWeight(){
+    return tour === "ATP" ? 0.65 : 0.70;
+  }
+
+  // --- Helpers
+  const favSpwEl = document.getElementById('favSpw');
+  const dogSpwEl = document.getElementById('dogSpw');
+
+  const favHoldEl = document.getElementById('favHold');
+  const dogHoldEl = document.getElementById('dogHold');
+  const favS2El = document.getElementById('favS2');
+  const dogS2El = document.getElementById('dogS2');
+
+  function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+
+  // Markov service game hold probability from point-win-on-serve p
+  function holdFromP(p){
+    if (!isFinite(p)) return NaN;
+    p = clamp01(p);
+    const q = 1-p;
+    // p^4(1+4q+10q^2) + 20 p^3 q^3 * (p^2/(1-2pq))
+    const preDeuce = Math.pow(p,4) * (1 + 4*q + 10*q*q);
+    const denom = (1 - 2*p*q);
+    const deuce = (20*Math.pow(p,3)*Math.pow(q,3)) * ((p*p)/denom);
+    return preDeuce + deuce;
+  }
+
+  // Convert holds into "probability to win a random game" g (serve order ignored)
+  function gameWinProb(holdA, holdB){
+    if (!isFinite(holdA) || !isFinite(holdB)) return NaN;
+    return (holdA + (1-holdB))/2;
+  }
+
+  // Set win probability to 6 games with TB at 6-6.
+  // Uses closed form for P(win set) given game-win prob g and TB win prob t.
+  function setWinProb(g, t){
+    if (!isFinite(g) || !isFinite(t)) return NaN;
+    g = clamp01(g); t = clamp01(t);
+    const q = 1-g;
+    // win 6-k for k=0..4 (binomial path counts)
+    const term =
+      Math.pow(g,6) * (1
+        + 6*q
+        + 21*q*q
+        + 56*Math.pow(q,3)
+        + 126*Math.pow(q,4)
+      );
+    // reach 5-5 then win by 2 OR reach 6-6 and win TB:
+    // coefficient C(10,5)=252; then win two games in a row (g^2) OR split and go TB (2*g*q*t)
+    const tieb =
+      252 * Math.pow(g,5) * Math.pow(q,5) * (g*g + 2*g*q*t);
+    return term + tieb;
+  }
+
+  function fmtPct(x){
+    if (!isFinite(x)) return "—";
+    return (x*100).toFixed(1) + "%";
+  }
+
+  function compute(){
+    const favOdds = parseFloat(oddsSelect.value);
+    const favSpw = parseFloat((favSpwEl.value||"").replace(",","."));
+    const dogSpw = parseFloat((dogSpwEl.value||"").replace(",","."));
+
+    if (!isFinite(favSpw) || !isFinite(dogSpw)){
+      favHoldEl.textContent = "—";
+      dogHoldEl.textContent = "—";
+      favS2El.textContent = "—";
+      dogS2El.textContent = "—";
+      return;
+    }
+
+    const pFav = favSpw/100.0;
+    const pDog = dogSpw/100.0;
+
+    const holdFav = holdFromP(pFav);
+    const holdDog = holdFromP(pDog);
+
+    const gFav = gameWinProb(holdFav, holdDog);
+    const gDog = 1-gFav;
+
+    // TB win prob proxy: TB ≈ g
+    const s2FromS1 = setWinProb(gFav, gFav);
+
+    // Baseline from starting odds (mirror, no overround): P_fav = 1/odds
+    const baseFav = clamp01(1/favOdds);
+    const w = marketWeight();
+    const modelFav = w*baseFav + (1-w)*s2FromS1;
+    const modelDog = 1-modelFav;
+
+    favHoldEl.textContent = fmtPct(holdFav);
+    dogHoldEl.textContent = fmtPct(holdDog);
+    favS2El.textContent = fmtPct(modelFav);
+    dogS2El.textContent = fmtPct(modelDog);
+  }
+
+  favSpwEl.addEventListener('input', compute);
+  dogSpwEl.addEventListener('input', compute);
+  oddsSelect.addEventListener('change', compute);
+  tourBtn.addEventListener('click', compute);
+
+  document.getElementById('clearBtn').addEventListener('click', ()=>{
+    favSpwEl.value = "";
+    dogSpwEl.value = "";
+    compute();
+    favSpwEl.focus();
+  });
+
+  // initial
+  compute();
+
+  // PWA install: register service worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+    });
+  }
+</script>
+</body>
+</html>
